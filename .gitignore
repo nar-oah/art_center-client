@@ -1,0 +1,117 @@
+# =================================================================
+# Python 核心文件
+# =================================================================
+# 字节码文件（加快二次运行速度，无需提交）
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C扩展文件
+*.so
+
+# 已安装的包（通常通过 pip 安装）
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# =================================================================
+# 虚拟环境（非常重要：永远不要提交虚拟环境目录）
+# =================================================================
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# =================================================================
+# 单元测试与代码覆盖率
+# =================================================================
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+class_schedule.xls
+images/
+
+# =================================================================
+# 常用 IDE 和编辑器配置
+# =================================================================
+# PyCharm / IntelliJ
+.idea/
+
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# =================================================================
+# 数据科学与 Jupyter Notebook
+# =================================================================
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+# 如果你不想提交生成的数据文件，可以取消下面注释
+# *.csv
+# *.json
+# *.sql
+# *.sqlite
+
+# =================================================================
+# 敏感信息与日志
+# =================================================================
+*.log
+# 环境变量文件（包含 API Key, 数据库密码等，必须忽略）
+.env
+.flaskenv
+*.env.*
+
+# =================================================================
+# 操作系统相关（防止 macOS/Windows 垃圾文件污染项目）
+# =================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+TODO.md
