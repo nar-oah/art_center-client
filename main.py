@@ -22,7 +22,8 @@ def run(directory: str) -> None:
     images = get_images(directory)
     features = [get_feature(path) for path in tqdm(images, desc="获取特征", unit="张")]
     analyzer.clear_vram()
-    f = lambda path: Json(pose_model.extract(path))
+    # f = lambda path: Json(pose_model.extract(path))
+    f = lambda path: Json(0.1)
     [db.add_data(feature, f) for feature in tqdm(features, desc="获取动作", unit="张")]
     # pose_model.clear_vram()
     db.close()

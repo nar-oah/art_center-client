@@ -5,6 +5,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
+pose/models/
+pose/image
 
 # C扩展文件
 *.so

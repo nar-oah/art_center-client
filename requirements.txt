@@ -4,9 +4,7 @@ psycopg[binary]
 numpy
 ultralytics
 tqdm
-# scipy>=1.10.0
-# smplx==0.1.28
-# chumpy
-# trimesh
-# yacs
-# einops
+opencv-python
+scipy
+timm
+einops

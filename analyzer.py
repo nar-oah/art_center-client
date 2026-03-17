@@ -1,7 +1,7 @@
 import torch
 from PIL import Image
-from typing import List, Tuple
-from transformers.models.siglip2.modeling_siglip2 import Siglip2Model
+from typing import List, Optional, Tuple
+from transformers.models.siglip2.modeling_siglip2 import Siglip2Model, Siglip2Output
 from transformers.models.siglip2.processing_siglip2 import Siglip2Processor
 
 
@@ -25,17 +25,17 @@ class ImageAnalyzer:
         self.prompts = [f"This is a photo of {label}." for label in self.labels]
 
     def get_data(self, path: str, threshold: float) -> Tuple[List[float], List[str]]:
-        def get_vector(tensor: torch.Tensor) -> List[float]:
-            return tensor[0].cpu().tolist()
+        def get_vector(tensor: Optional[torch.Tensor]) -> List[float]:
+            return tensor[0].cpu().tolist() if tensor else []
 
-        def get_category(tensor: torch.Tensor) -> List[str]:
-            probs = get_vector(torch.sigmoid(tensor))
+        def get_category(tensor: Optional[torch.Tensor]) -> List[str]:
+            probs = get_vector(torch.sigmoid(tensor)) if tensor else []
             return [self.labels[i] for i, prob in enumerate(probs) if prob > threshold]
 
         image = Image.open(path).convert("RGB")
         inputs = self.processor(text=self.prompts, images=image).to(self.model.device)
         with torch.no_grad():
-            outputs = self.model(**inputs)
+            outputs: Siglip2Output = self.model(**inputs)
         return get_vector(outputs.image_embeds), get_category(outputs.logits_per_image)
 
     def clear_vram(self) -> None:
