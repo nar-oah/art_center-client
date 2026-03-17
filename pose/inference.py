@@ -5,9 +5,11 @@ from ultralytics.models.yolo import YOLO
 from scipy.spatial.transform import Rotation as R
 from typing import Dict, Optional
 from smplx import PureSMPLestX
+from pathlib import Path
 
-YOLO_PATH = "models/yolo26n.pt"
-SMPLX_PATH = "models/smplest_x_h.pth.tar"
+script_dir = Path(__file__).resolve().parent
+YOLO_PATH = script_dir / "models" / "yolo26n.pt"
+SMPLX_PATH = script_dir / "models" / "smplest_x_h.pth.tar"
 
 
 class PoseExtractorPipeline:
@@ -42,7 +44,7 @@ class PoseExtractorPipeline:
 
     @torch.no_grad()
     def process_image_bytes(self, path: str) -> Optional[Dict[str, np.ndarray]]:
-        img = cv2.imread(path, cv2.IMREAD_COLOR)
+        img = cv2.imread(str(path), cv2.IMREAD_COLOR)
         if img is None:
             return None
         results = self.yolo(img, classes=[0], verbose=False)  # class 0 是人
@@ -55,7 +57,7 @@ class PoseExtractorPipeline:
         cropped_img = img[y1:y2, x1:x2]
 
         # 3. 尺寸变换与归一化 (SMPLest-X 标准输入)
-        resized_img = cv2.resize(cropped_img, (256, 256))
+        resized_img = cv2.resize(cropped_img, (192, 256))
         rgb_img = cv2.cvtColor(resized_img, cv2.COLOR_BGR2RGB)
         tensor_img = torch.from_numpy(rgb_img).float() / 255.0
         # 标准 ImageNet 归一化
@@ -79,6 +81,7 @@ class PoseExtractorPipeline:
 
 if __name__ == "__main__":
     pipeline = PoseExtractorPipeline()
-    pose_data = pipeline.process_image_bytes("image/test.jpg")
+    path = script_dir / "image" / "test.jpg"
+    pose_data = pipeline.process_image_bytes(path)
     result = pose_data["body_pose"].shape if pose_data else "无"
     print("身体参数维度:", result)

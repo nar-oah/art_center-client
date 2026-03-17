@@ -5,6 +5,7 @@ import copy
 import einops
 from einops import rearrange, repeat
 from typing import Callable, Optional, List, Tuple, Dict, Any, Union
+from functools import partial
 
 # 修正后的 timm 引入方式
 from timm.layers.drop import drop_path

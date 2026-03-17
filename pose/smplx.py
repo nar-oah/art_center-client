@@ -5,6 +5,7 @@ from module import ViT, TransformerDecoderHead
 
 ENCODER: dict = {
     "img_size": (256, 192),
+    "patch_size": 16,
     "embed_dim": 1280,
     "depth": 32,
     "num_heads": 16,
