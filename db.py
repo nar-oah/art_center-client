@@ -14,7 +14,7 @@ class DatabaseManager:
         path, (vector, categories) = feature
         pose = get_pose(path) if "pose" in categories else None
         insert_query = """
-                INSERT INTO image_library (path, vector, categories, pose)
+                INSERT INTO art_center (path, vector, categories, pose)
                 VALUES (%s, %s, %s, %s)
                 ON CONFLICT (path) DO UPDATE 
                 SET vector = EXCLUDED.vector,
