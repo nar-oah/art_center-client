@@ -3,6 +3,7 @@ from typing import List
 from psycopg.types.json import Json
 from db import DatabaseManager, Feature
 from analyzer import ImageAnalyzer
+from pose.inference import PoseExtractorPipeline
 from tqdm import tqdm
 
 
@@ -19,16 +20,16 @@ def run(directory: str) -> None:
 
     db = DatabaseManager()
     analyzer = ImageAnalyzer()
+    pose = PoseExtractorPipeline()
     images = get_images(directory)
     features = [get_feature(path) for path in tqdm(images, desc="获取特征", unit="张")]
     analyzer.clear_vram()
-    # f = lambda path: Json(pose_model.extract(path))
-    f = lambda path: Json(0.1)
+    f = lambda path: Json(pose.get_pose(path))
     [db.add_data(feature, f) for feature in tqdm(features, desc="获取动作", unit="张")]
-    # pose_model.clear_vram()
+    pose.clear_vram()
     db.close()
 
 
 if __name__ == "__main__":
-    IMAGE_FOLDER = "./test_images"
+    IMAGE_FOLDER = "./pose/image/"
     run(IMAGE_FOLDER)
