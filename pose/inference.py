@@ -85,5 +85,7 @@ if __name__ == "__main__":
     pipeline = PoseExtractorPipeline()
     path = DIR / "image" / "test.jpg"
     pose_data = pipeline.get_pose(str(path))
-    if pose_data:
-        print(f"{key}: {value.tolist()}" for key, value in pose_data.items())
+    print("根参数:", pose_data['body_root_pose'])
+    print("身体参数:", pose_data['body_pose'])
+    print("左手参数:", pose_data['lhand_pose'])
+    print("右手参数:", pose_data['rhand_pose'])
