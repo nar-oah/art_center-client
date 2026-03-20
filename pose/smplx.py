@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from typing import Dict
-from module import ViT, TransformerDecoderHead
+from pose.module import ViT, TransformerDecoderHead
 
 ENCODER: dict = {
     "img_size": (256, 192),

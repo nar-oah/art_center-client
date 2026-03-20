@@ -6,7 +6,7 @@ import ultralytics.engine.results as results
 from ultralytics.models.yolo import YOLO
 from scipy.spatial.transform import Rotation as R
 from typing import Any, Dict, Mapping, Optional, Tuple, List
-from smplx import PureSMPLestX
+from pose.smplx import PureSMPLestX
 from pathlib import Path
 
 DIR = Path(__file__).resolve().parent
