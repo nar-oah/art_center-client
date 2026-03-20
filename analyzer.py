@@ -1,6 +1,7 @@
 import torch
 from PIL import Image
 from typing import List, Optional, Tuple
+from transformers import ImagesKwargs
 from transformers.models.siglip2.modeling_siglip2 import Siglip2Model, Siglip2Output
 from transformers.models.siglip2.processing_siglip2 import Siglip2Processor
 
@@ -33,7 +34,8 @@ class ImageAnalyzer:
             return [self.labels[i] for i, prob in enumerate(probs) if prob > threshold]
 
         image = Image.open(path).convert("RGB")
-        inputs = self.processor(text=self.prompts, images=image).to(self.model.device)
+        kwargs = ImagesKwargs(return_tensors="pt", device=self.model.device)
+        inputs = self.processor(text=self.prompts, images=image, images_kwargs=kwargs)
         with torch.no_grad():
             outputs: Siglip2Output = self.model(**inputs)
         return get_vector(outputs.image_embeds), get_category(outputs.logits_per_image)
