@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import List
 from psycopg.types.json import Json
 from db import DatabaseManager, Feature
@@ -7,7 +8,7 @@ from pose.inference import PoseExtractorPipeline
 from tqdm import tqdm
 
 
-def run(directory: str) -> None:
+def main(directory: str) -> None:
     def get_images(directory: str) -> List[str]:
         return [
             os.path.join(directory, path)
@@ -31,5 +32,4 @@ def run(directory: str) -> None:
 
 
 if __name__ == "__main__":
-    IMAGE_FOLDER = "./pose/image/"
-    run(IMAGE_FOLDER)
+    main(sys.argv[1])

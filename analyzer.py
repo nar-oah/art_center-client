@@ -1,9 +1,8 @@
 import torch
 from PIL import Image
 from typing import List, Optional, Tuple
-from transformers import ImagesKwargs
-from transformers.models.siglip2.modeling_siglip2 import Siglip2Model, Siglip2Output
-from transformers.models.siglip2.processing_siglip2 import Siglip2Processor
+from transformers import Siglip2Model, Siglip2Processor
+from transformers.models.siglip2.modeling_siglip2 import Siglip2Output
 
 
 class ImageAnalyzer:
@@ -23,19 +22,24 @@ class ImageAnalyzer:
             "background",
             "graphic design",
         ]
-        self.prompts = [f"This is a photo of {label}." for label in self.labels]
+        self.prompts = [f"A digital artwork showing {label}." for label in self.labels]
 
     def get_data(self, path: str, threshold: float) -> Tuple[List[float], List[str]]:
         def get_vector(tensor: Optional[torch.Tensor]) -> List[float]:
-            return tensor[0].cpu().tolist() if tensor else []
+            return tensor[0].cpu().tolist() if tensor is not None else []
 
         def get_category(tensor: Optional[torch.Tensor]) -> List[str]:
-            probs = get_vector(torch.sigmoid(tensor)) if tensor else []
+            probs = get_vector(torch.sigmoid(tensor)) if tensor is not None else []
             return [self.labels[i] for i, prob in enumerate(probs) if prob > threshold]
 
         image = Image.open(path).convert("RGB")
-        kwargs = ImagesKwargs(return_tensors="pt", device=self.model.device)
-        inputs = self.processor(text=self.prompts, images=image, images_kwargs=kwargs)
+        inputs = self.processor(
+            text=self.prompts,
+            images=image,
+            padding="max_length",
+            max_num_patches=256,
+            return_tensors="pt",
+        ).to(self.model.device)
         with torch.no_grad():
             outputs: Siglip2Output = self.model(**inputs)
         return get_vector(outputs.image_embeds), get_category(outputs.logits_per_image)

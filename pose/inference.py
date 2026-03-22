@@ -1,3 +1,4 @@
+import sys
 import cv2
 from numpy.typing import NDArray
 import torch
@@ -83,9 +84,11 @@ class PoseExtractorPipeline:
 
 if __name__ == "__main__":
     pipeline = PoseExtractorPipeline()
-    path = DIR / "image" / "test.jpg"
-    pose_data = pipeline.get_pose(str(path))
-    print("根参数:", pose_data['body_root_pose'])
-    print("身体参数:", pose_data['body_pose'])
-    print("左手参数:", pose_data['lhand_pose'])
-    print("右手参数:", pose_data['rhand_pose'])
+    path = DIR / "image" / sys.argv[1]
+    if pose_data := pipeline.get_pose(str(path)):
+        print("根参数:", pose_data["body_root_pose"])
+        print("身体参数:", pose_data["body_pose"])
+        print("左手参数:", pose_data["lhand_pose"])
+        print("右手参数:", pose_data["rhand_pose"])
+    else:
+        print("参数获取错误")
