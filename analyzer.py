@@ -1,3 +1,4 @@
+import sys
 import torch
 from PIL import Image
 from typing import List, Optional, Tuple
@@ -14,37 +15,44 @@ class ImageAnalyzer:
             attn_implementation="sdpa",
         )
         self.processor = Siglip2Processor.from_pretrained(model_name)
-        self.labels = [
-            "pose",
-            "makeup",
-            "clothing",
-            "hairstyle",
-            "background",
-            "graphic design",
-        ]
-        self.prompts = [f"A digital artwork showing {label}." for label in self.labels]
+        describe = {
+            "pose": "An image focusing on a character's dynamic pose, stance, and body language.",
+            "makeup": "A close-up portrait focusing on facial features, detailed makeup, and expressions.",
+            "clothing": "An image prominently highlighting fashion design, detailed clothing, outfits, costumes, or armor.",
+            "hairstyle": "An image emphasizing hair design, haircut, hair flow, and detailed hairstyle.",
+            "background": "An image prominently featuring scenery, landscape, environment design, or detailed backgrounds.",
+            "design": "An image showcasing user interface (UI) elements, HUD, graphic design, typography, or layout.",
+        }
+        self.labels = list(describe.keys())
+        self.prompts = list(describe.values())
 
+    @torch.no_grad()
     def get_data(self, path: str, threshold: float) -> Tuple[List[float], List[str]]:
         def get_vector(tensor: Optional[torch.Tensor]) -> List[float]:
             return tensor[0].cpu().tolist() if tensor is not None else []
 
-        def get_category(tensor: Optional[torch.Tensor]) -> List[str]:
-            probs = get_vector(torch.sigmoid(tensor)) if tensor is not None else []
-            return [self.labels[i] for i, prob in enumerate(probs) if prob > threshold]
+        def get_category(probs: List[float]) -> List[str]:
+            category = [self.labels[i] for i, p in enumerate(probs) if p > threshold]
+            return category if category else [self.labels[probs.index(max(probs))]]
 
         image = Image.open(path).convert("RGB")
-        inputs = self.processor(
-            text=self.prompts,
-            images=image,
-            padding="max_length",
-            max_num_patches=256,
-            return_tensors="pt",
-        ).to(self.model.device)
-        with torch.no_grad():
-            outputs: Siglip2Output = self.model(**inputs)
-        return get_vector(outputs.image_embeds), get_category(outputs.logits_per_image)
+        kwargs = {
+            "padding": "max_length",
+            "max_num_patches": 256,
+            "return_tensors": "pt",
+        }
+        device = self.model.device
+        inputs = self.processor(text=self.prompts, images=image, **kwargs).to(device)
+        outputs: Siglip2Output = self.model(**inputs)
+        probs = get_vector(outputs.logits_per_image)
+        return get_vector(outputs.image_embeds), get_category(probs)
 
     def clear_vram(self) -> None:
         del self.model
         del self.processor
         torch.cuda.empty_cache()
+
+
+if __name__ == "__main__":
+    analyzer = ImageAnalyzer()
+    analyzer.get_data(sys.argv[1], 0.1)
