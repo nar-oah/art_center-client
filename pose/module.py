@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from typing import Optional, Tuple, Dict, Any
 import einops
 from einops import rearrange, repeat
 from timm.models.vision_transformer import Block
@@ -8,12 +7,18 @@ from timm.layers.patch_embed import PatchEmbed
 from timm.layers.weight_init import trunc_normal_
 
 
-def exists(val: Any) -> bool:
+def exists(val: object) -> bool:
     return val is not None
 
 
-def default(val: Any, d: Any) -> Any:
+def default(val: object, d: object) -> object:
     if exists(val):
+        return val
+    return d() if callable(d) else d
+
+
+def int_default(val: int | None, d: int) -> int:
+    if exists(val) and val is not None:
         return val
     return d() if callable(d) else d
 
@@ -71,7 +76,7 @@ class ViT(nn.Module):
 
         self.last_norm = nn.LayerNorm(embed_dim)
 
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         B = x.shape[0]
 
         x_embed = self.patch_embed(x)
@@ -141,7 +146,7 @@ class TransformerDecoderHead(nn.Module):
         self.dec_face_jaw_pose = nn.Linear(1 * self.dim_out, 6)
         self.dec_face_cam = nn.Linear(1 * self.dim_out, 3)
 
-    def forward(self, token: torch.Tensor, x: torch.Tensor) -> Dict[str, torch.Tensor]:
+    def forward(self, token: torch.Tensor, x: torch.Tensor) -> dict[str, torch.Tensor]:
         batch_size = x.shape[0]
         x = einops.rearrange(x, "b c h w -> b (h w) c")
         token = torch.cat((token, x), dim=1)
@@ -212,7 +217,7 @@ class TransformerDecoder(nn.Module):
         dim_head: int = 64,
         dropout: float = 0.0,
         emb_dropout: float = 0.0,
-        context_dim: Optional[int] = None,
+        context_dim: int | None = None,
         **_,
     ) -> None:
         super().__init__()
@@ -224,7 +229,7 @@ class TransformerDecoder(nn.Module):
         )
 
     def forward(
-        self, x: torch.Tensor, *args: Any, context: Optional[torch.Tensor] = None
+        self, x: torch.Tensor, *args: object, context: torch.Tensor | None = None
     ) -> torch.Tensor:
         _, n, _ = x.shape
         x = self.dropout(x)
@@ -241,7 +246,7 @@ class TransformerCrossAttn(nn.Module):
         dim_head: int,
         mlp_dim: int,
         dropout: float = 0.0,
-        context_dim: Optional[int] = None,
+        context_dim: int | None = None,
     ) -> None:
         super().__init__()
         self.layers: nn.ModuleList = nn.ModuleList([])
@@ -260,7 +265,7 @@ class TransformerCrossAttn(nn.Module):
             )
 
     def forward(
-        self, x: torch.Tensor, *args: Any, context: Optional[torch.Tensor] = None
+        self, x: torch.Tensor, *args: object, context: torch.Tensor | None = None
     ) -> torch.Tensor:
         for self_attn, cross_attn, ff in self.layers:
             x = self_attn(x, *args) + x
@@ -275,7 +280,7 @@ class PreNorm(nn.Module):
         self.norm = nn.LayerNorm(dim)
         self.fn = fn
 
-    def forward(self, x: torch.Tensor, *_: Any, **kwargs: Any) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, *_: object, **kwargs: object) -> torch.Tensor:
         return self.fn(self.norm(x), **kwargs)
 
 
@@ -324,7 +329,7 @@ class CrossAttention(nn.Module):
     def __init__(
         self,
         dim: int,
-        context_dim: Optional[int] = None,
+        context_dim: int | None = None,
         heads: int = 8,
         dim_head: int = 64,
         dropout: float = 0.0,
@@ -335,7 +340,7 @@ class CrossAttention(nn.Module):
         self.heads, self.scale = heads, dim_head**-0.5
         self.attend = nn.Softmax(dim=-1)
         self.dropout = nn.Dropout(dropout)
-        self.to_kv = nn.Linear(default(context_dim, dim), inner_dim * 2, bias=False)
+        self.to_kv = nn.Linear(int_default(context_dim, dim), inner_dim * 2, bias=False)
         self.to_q = nn.Linear(dim, inner_dim, bias=False)
         self.to_out = (
             nn.Sequential(nn.Linear(inner_dim, dim), nn.Dropout(dropout))
@@ -344,7 +349,7 @@ class CrossAttention(nn.Module):
         )
 
     def forward(
-        self, x: torch.Tensor, context: Optional[torch.Tensor] = None
+        self, x: torch.Tensor, context: torch.Tensor | None = None
     ) -> torch.Tensor:
         k_chunk, v_chunk = self.to_kv(default(context, x)).chunk(2, dim=-1)
         q_tensor = self.to_q(x)

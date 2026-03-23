@@ -1,7 +1,6 @@
 import sys
 import torch
 from PIL import Image
-from typing import List, Optional, Tuple
 from transformers import Siglip2Model, Siglip2Processor
 from transformers.models.siglip2.modeling_siglip2 import Siglip2Output
 
@@ -27,11 +26,11 @@ class ImageAnalyzer:
         self.prompts = list(describe.values())
 
     @torch.no_grad()
-    def get_data(self, path: str, threshold: float) -> Tuple[List[float], List[str]]:
-        def get_vector(tensor: Optional[torch.Tensor]) -> List[float]:
+    def get_data(self, path: str, threshold: float) -> tuple[list[float], list[str]]:
+        def get_vector(tensor: torch.Tensor | None) -> list[float]:
             return tensor[0].cpu().tolist() if tensor is not None else []
 
-        def get_category(probs: List[float]) -> List[str]:
+        def get_category(probs: list[float]) -> list[str]:
             category = [self.labels[i] for i, p in enumerate(probs) if p > threshold]
             return category if category else [self.labels[probs.index(max(probs))]]
 

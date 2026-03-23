@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from typing import Dict
 from pose.module import ViT, TransformerDecoderHead
 
 ENCODER: dict = {
@@ -19,7 +18,7 @@ class PureSMPLestX(nn.Module):
         self.encoder = ViT(**ENCODER)
         self.decoder = TransformerDecoderHead(**DECODER)
 
-    def forward(self, img_tensor: torch.Tensor) -> Dict[str, torch.Tensor]:
+    def forward(self, img_tensor: torch.Tensor) -> dict[str, torch.Tensor]:
         img_feat, task_tokens = self.encoder(img_tensor)
-        pred_params: Dict[str, torch.Tensor] = self.decoder(task_tokens, img_feat)
+        pred_params: dict[str, torch.Tensor] = self.decoder(task_tokens, img_feat)
         return pred_params

@@ -1,8 +1,8 @@
 import psycopg
 from psycopg.types.json import Json
-from typing import Callable, List, Tuple, TypeAlias
+from collections.abc import Callable
 
-Feature: TypeAlias = Tuple[str, Tuple[List[float], List[str]]]
+type Feature = tuple[str, tuple[list[float], list[str]]]
 
 
 class DatabaseManager:

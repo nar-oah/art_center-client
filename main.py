@@ -1,6 +1,5 @@
 import os
 import sys
-from typing import List
 from psycopg.types.json import Json
 from db import DatabaseManager, Feature
 from analyzer import ImageAnalyzer
@@ -9,7 +8,7 @@ from tqdm import tqdm
 
 
 def main(directory: str) -> None:
-    def get_images(directory: str) -> List[str]:
+    def get_images(directory: str) -> list[str]:
         return [
             os.path.join(directory, path)
             for path in os.listdir(directory)

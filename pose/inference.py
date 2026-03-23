@@ -6,7 +6,7 @@ import numpy as np
 import ultralytics.engine.results as results
 from ultralytics.models.yolo import YOLO
 from scipy.spatial.transform import Rotation as R
-from typing import Any, Dict, Mapping, Optional, Tuple, List
+from collections.abc import Mapping
 from pose.smplx import PureSMPLestX
 from pathlib import Path
 
@@ -17,7 +17,7 @@ SMPLX_PATH = DIR / "models" / "smplest_x_h.pth.tar"
 
 class PoseExtractorPipeline:
     def __init__(self) -> None:
-        def get_state_dict(device: torch.device) -> Mapping[str, Any]:
+        def get_state_dict(device: torch.device) -> Mapping[str, object]:
             ckpt = torch.load(SMPLX_PATH, map_location=device)
             state_dict = ckpt["network"] if "network" in ckpt else ckpt
             return {
@@ -33,7 +33,7 @@ class PoseExtractorPipeline:
         self.smplx.eval()
 
     def get_angle(self, rot6d: np.ndarray) -> np.ndarray:
-        def get_vector(rot6d: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        def get_vector(rot6d: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
             N = rot6d.shape[0]
             rot6d = rot6d.reshape(N, 2, 3)
             return rot6d[:, 0, :], rot6d[:, 1, :]
@@ -49,7 +49,7 @@ class PoseExtractorPipeline:
         return axis_angles
 
     @torch.no_grad()
-    def get_pose(self, path: str) -> Optional[Dict[str, np.ndarray]]:
+    def get_pose(self, path: str) -> dict[str, np.ndarray] | None:
         def get_human(boxes: results.Boxes, img: np.ndarray) -> np.ndarray:
             x1, y1, x2, y2 = boxes[0].xyxy[0].cpu().numpy().squeeze().astype(int)
             return img[y1:y2, x1:x2]
@@ -65,11 +65,11 @@ class PoseExtractorPipeline:
             std = torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1)
             return ((tensor_img - mean) / std).to(self.device)
 
-        def get_angle(params: Dict[str, torch.Tensor], key: str) -> np.ndarray:
+        def get_angle(params: dict[str, torch.Tensor], key: str) -> np.ndarray:
             rot6d_cpu = params[key].cpu().numpy().reshape(-1, 6)
             return self.get_angle(rot6d_cpu)
 
-        results: List[results.Results] = self.yolo(path, classes=[0], verbose=False)
+        results: list[results.Results] = self.yolo(path, classes=[0], verbose=False)
         if boxes := results[0].boxes:
             img = get_human(boxes, results[0].orig_img)
             params = self.smplx(mod_tensor(get_tensor(img)))
