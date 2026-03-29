@@ -1,4 +1,3 @@
-import sys
 import cv2
 from numpy.typing import NDArray
 import torch
@@ -83,6 +82,8 @@ class PoseExtractorPipeline:
 
 
 if __name__ == "__main__":
+    import sys
+
     pipeline = PoseExtractorPipeline()
     path = DIR / "image" / sys.argv[1]
     if pose_data := pipeline.get_pose(str(path)):

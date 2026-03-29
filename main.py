@@ -1,5 +1,4 @@
 import os
-import sys
 from psycopg.types.json import Json
 from db import DatabaseManager, Feature
 from analyzer import ImageAnalyzer
@@ -31,4 +30,6 @@ def main(directory: str) -> None:
 
 
 if __name__ == "__main__":
+    import sys
+
     main(sys.argv[1])
