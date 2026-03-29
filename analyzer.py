@@ -14,6 +14,7 @@ class ImageAnalyzer:
             device_map="cuda",
             attn_implementation="sdpa",
         )
+        self.model.eval()
         self.processor = Siglip2Processor.from_pretrained(model_name)
         self.labels = [
             "background element",
