@@ -34,8 +34,8 @@ class PoseExtractorPipeline:
     def get_angle(self, rot6d: np.ndarray) -> np.ndarray:
         def get_vector(rot6d: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
             N = rot6d.shape[0]
-            rot6d = rot6d.reshape(N, 2, 3)
-            return rot6d[:, 0, :], rot6d[:, 1, :]
+            rot6d = rot6d.reshape(N, 3, 2)
+            return rot6d[:, :, 0], rot6d[:, :, 1]
 
         def get_matrix(a1: np.ndarray, a2: np.ndarray) -> NDArray:
             b1 = a1 / np.linalg.norm(a1, axis=-1, keepdims=True)
