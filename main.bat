@@ -14,7 +14,7 @@ IF ERRORLEVEL 1 (
 
 echo Starting the Python indexing script...
 echo.
-python main.py D:\Resources\
+python main.py /d/Resources/
 
 echo.
 echo -----------------------------------------------------

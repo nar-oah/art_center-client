@@ -9,9 +9,10 @@ from tqdm import tqdm
 def main(directory: str) -> None:
     def get_images(directory: str) -> list[str]:
         return [
-            os.path.join(directory, path)
-            for path in os.listdir(directory)
-            if path.endswith((".png", ".jpg", ".jpeg"))
+            os.path.join(root, file)
+            for root, _, files in os.walk(directory)
+            for file in files
+            if file.lower().endswith((".png", ".jpg", ".jpeg"))
         ]
 
     def get_feature(path: str) -> Feature:

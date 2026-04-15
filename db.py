@@ -12,7 +12,7 @@ class DatabaseManager:
 
     def add_data(self, feature: Feature, get_pose: Callable[[str], Json]) -> None:
         path, (vector, categories) = feature
-        pose = get_pose(path) if "pose" in categories else None
+        pose = get_pose(path) if "pose or body gesture" in categories else None
         insert_query = """
                 INSERT INTO art_center (path, vector, categories, pose)
                 VALUES (%s, %s, %s, %s)

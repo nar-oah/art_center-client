@@ -48,7 +48,7 @@ class PoseExtractorPipeline:
         return axis_angles
 
     @torch.no_grad()
-    def get_pose(self, path: str) -> dict[str, np.ndarray] | None:
+    def get_pose(self, path: str) -> dict[str, list[float]] | None:
         def get_human(boxes: results.Boxes, img: np.ndarray) -> np.ndarray:
             x1, y1, x2, y2 = boxes[0].xyxy[0].cpu().numpy().squeeze().astype(int)
             return img[y1:y2, x1:x2]
@@ -73,7 +73,7 @@ class PoseExtractorPipeline:
             img = get_human(boxes, results[0].orig_img)
             params = self.smplx(mod_tensor(get_tensor(img)))
             keys = ["body_root_pose", "body_pose", "lhand_pose", "rhand_pose"]
-            return {key: get_angle(params, key) for key in keys}
+            return {key: get_angle(params, key).tolist() for key in keys}
 
     def clear_vram(self) -> None:
         del self.yolo
