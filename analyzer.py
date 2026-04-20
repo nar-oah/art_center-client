@@ -37,8 +37,9 @@ class ImageAnalyzer:
             return f(tensor)[0].cpu().tolist() if isinstance(tensor, Tensor) else []
 
         def get_category(probs: list[float]) -> list[str]:
+            get_max: Callable[[list[float]], int] = lambda p: p.index(max(p))
             category = [self.labels[i] for i, p in enumerate(probs) if p > threshold]
-            return category if category else [self.labels[probs.index(max(probs))]]
+            return category if category else [self.labels[get_max(probs[:-1])]]
 
         image = Image.open(path).convert("RGB")
         kwargs = {
